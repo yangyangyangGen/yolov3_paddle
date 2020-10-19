@@ -6,7 +6,8 @@ from xml.etree import ElementTree as ET
 def get_cname2cid_dict_from_txt(
         label_list_txt=r"D:\workspace\DataSets\det\Insect\ImageSets\label_list.txt"):
 
-    assert os.path.exists(label_list_txt), "{} not exists".format(label_list_txt)
+    assert os.path.exists(
+        label_list_txt), "{} not exists".format(label_list_txt)
 
     with open(label_list_txt, "r") as fr:
         content = [line.strip() for line in fr.readlines() if len(line)]
@@ -21,8 +22,10 @@ def get_cname2cid_dict_from_txt(
 def voc_parse(cname2cid_map,
               image_anno_txt_abspath, split_character=" "):
 
-    assert isinstance(cname2cid_map, dict), "cname2cid map is not isinstance dict."
-    assert os.path.exists(image_anno_txt_abspath), "{} not exists.".format(image_anno_txt_abspath)
+    assert isinstance(
+        cname2cid_map, dict), "cname2cid map is not isinstance dict."
+    assert os.path.exists(image_anno_txt_abspath), "{} not exists.".format(
+        image_anno_txt_abspath)
 
     abs_dirname = os.path.dirname(image_anno_txt_abspath)
     image_id = 0
@@ -47,7 +50,9 @@ def voc_parse(cname2cid_map,
                                  if not os.path.exists(file)]
 
         if len(not_exists_files_list):
-            print("Warning: {} not exists!!!".format(" ".join(not_exists_files_list)))  # todo: use log.
+            # todo: use log.
+            print("Warning: {} not exists!!!".format(
+                " ".join(not_exists_files_list)))
             continue
 
         # 2. Parse.
@@ -82,7 +87,8 @@ def voc_parse(cname2cid_map,
 
             # get cls, box.
             _cname = obj.find('name').text
-            _cid = cname2cid_map[_cname]  # todo: -> cname2id_map.get(_cname, -1) ???
+            # todo: -> cname2id_map.get(_cname, -1) ???
+            _cid = cname2cid_map[_cname]
 
             bndbox_ele = obj.find("bndbox")
             assert bndbox_ele
@@ -120,8 +126,10 @@ def voc_parse(cname2cid_map,
 def voc_parse_generator(cname2cid_map,
                         image_anno_txt_abspath, split_character=" "):
 
-    assert isinstance(cname2cid_map, dict), "cname2cid map is not isinstance dict."
-    assert os.path.exists(image_anno_txt_abspath), "{} not exists.".format(image_anno_txt_abspath)
+    assert isinstance(
+        cname2cid_map, dict), "cname2cid map is not isinstance dict."
+    assert os.path.exists(image_anno_txt_abspath), "{} not exists.".format(
+        image_anno_txt_abspath)
 
     abs_dirname = os.path.dirname(image_anno_txt_abspath)
     image_id = 0
@@ -144,7 +152,9 @@ def voc_parse_generator(cname2cid_map,
                                  if not os.path.exists(file)]
 
         if len(not_exists_files_list):
-            print("Warning: {} not exists!!!".format(" ".join(not_exists_files_list)))  # todo: use log.
+            # todo: use log.
+            print("Warning: {} not exists!!!".format(
+                " ".join(not_exists_files_list)))
             continue
 
         # 2. Parse.
@@ -179,7 +189,8 @@ def voc_parse_generator(cname2cid_map,
 
             # get cls, box.
             _cname = obj.find('name').text
-            _cid = cname2cid_map[_cname]  # todo: -> cname2id_map.get(_cname, -1) ???
+            # todo: -> cname2id_map.get(_cname, -1) ???
+            _cid = cname2cid_map[_cname]
 
             bndbox_ele = obj.find("bndbox")
             assert bndbox_ele
@@ -223,13 +234,3 @@ if __name__ == "__main__":
     record_genator = voc_parse_generator(cname2cid_map, fpath)
     print(type(record_genator))
     print(next(record_genator))
-
-
-
-
-
-
-
-
-
-
