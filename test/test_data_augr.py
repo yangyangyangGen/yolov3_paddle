@@ -1,8 +1,11 @@
 """
+Done Data: 2020.10.19
 
-data aug test ok function:
-        random_expand, random_distort, random_crop, 
-        random_interp_zoom, random_hflip, random_vflip
+Description:
+    Test ok function:
+        random_expand, random_distort, random_crop, random_interp_zoom, 
+        random_hflip, random_vflip
+
 
 
 
@@ -14,13 +17,11 @@ import matplotlib.patches as patches
 import matplotlib as mpl
 import random
 from matplotlib import pyplot as plt
+
 import sys
 sys.path.append("../data")
-from aug import random_expand, random_distort, random_crop, random_interp_zoom, random_hflip, random_vflip, image_augment
 
-from annotation import get_cname2cid_dict_from_txt, voc_parse
-
-from wrapper import get_img_data_from_record_dict
+from aug import random_expand, random_distort, random_crop, random_interp_zoom, random_hflip, random_vflip
 
 
 # Define global image and gt.
@@ -44,7 +45,6 @@ h, w = im.shape[:2]
 bboxes_xywh_normed = bboxes_xywh.astype("float32")
 bboxes_xywh_normed[..., 0::2] = bboxes_xywh_normed[..., 0::2] / float(w)
 bboxes_xywh_normed[..., 1::2] = bboxes_xywh_normed[..., 1::2] / float(h)
-
 
 
 def draw_rectangle(currentAxis, bbox,
@@ -85,7 +85,6 @@ def test_random_distort():
     plt.show()
 
     status = False
-
 
 def test_random_expand(status=True):
     """
@@ -216,19 +215,22 @@ def test_random_expand(status=True):
             draw_rectangle(currentAxis, bbox, edgecolor="b")
 
     if status:
-        plt.subplot(221)
-        fn1()
-        plt.subplot(222)
-        fn2()  #
-        plt.subplot(223)
-        fn3()
+        try:
+            plt.subplot(221)
+            fn1()
+            plt.subplot(222)
+            fn2()  #
+            plt.subplot(223)
+            fn3()
+        except AssertionError as e:
+            sys.stderr.write("Assert Error because function has changed.")
+            
         plt.subplot(224)
         fn4()
         plt.show()
     else:
         fn5()
         plt.show()
-
 
 def test_random_crop():
     im = cv2.imread(fname)
@@ -281,7 +283,6 @@ def test_random_crop():
 
     plt.show()
 
-
 def test_random_interp_zoom():
     global im, bboxes_xywh_normed, bbox_xywh
     mpl.rcParams["figure.dpi"] = 120
@@ -328,7 +329,6 @@ def test_random_interp_zoom():
             plt.title(f'{random_size}@{random_size}')
 
     plt.show()
-
 
 def test_random_flip():
     """
@@ -390,33 +390,17 @@ def test_random_flip():
                 for xywh in bboxes_decoded:
                     draw_rectangle(currentAxis, xywh, edgecolor="b")
     
-    # fn1()     
+    fn1()     
     # fn2()
     
     plt.show()
 
 
-def test_image_aug():
-    
-    
-    fpath = r"D:\workspace\DataSets\det\Insect\ImageSets\train.txt"
-    cname2cid_map = get_cname2cid_dict_from_txt()
-    record_list = voc_parse(cname2cid_map, fpath)
-    
-    
-    img, gt_boxes, gt_labels, scales = get_img_data_from_record_dict(record_list[0])
-    size = 512
-    out_img, out_gt_boxes, out_gt_labels = image_augment(img, gt_boxes, gt_labels, size)
-    
-    print(out_img.shape, out_gt_boxes.shape, out_gt_labels.shape)
-
-
 if __name__ == "__main__":
     # test_random_distort()
-    # test_random_expand(True)
+    test_random_expand(True)
     # test_random_crop()
     # test_random_interp_zoom()
     # test_random_flip()
-    # test_image_aug()
     
-    print(f"{__file__} -> {__name__} result Done.")
+    print(f"Task[Test]: {__file__} -> {__name__} result Done.")

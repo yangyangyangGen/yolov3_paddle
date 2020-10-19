@@ -1,8 +1,9 @@
 import os
 import cv2
 import numpy as np
+from aug import image_augment
 
-__all__ = ["get_img_data_from_record_dict"]
+__all__ = ["get_img_data_from_record"]
 
 def get_bbox_N(gt_bbox, gt_clas, N):
     assert N != 0
@@ -23,7 +24,7 @@ def get_bbox_N(gt_bbox, gt_clas, N):
     return ret_bbox, ret_clas
 
 
-def get_img_data_from_record_dict(record_dict,
+def get_img_data_from_onerecord_dict(record_dict,
                                   number_gt=50, bbox_do_normalize=True) -> tuple:
     """
         record_desc = {
@@ -70,6 +71,23 @@ def get_img_data_from_record_dict(record_dict,
             gt_xywh, gt_class,
             (h, w))
 
+# TODO: 使用语法糖实现hook形式api. ???
+def get_img_data_from_record(record,
+                             size=640,
+                             mean=(0.485, 0.456, 0.406),
+                             std=(0.229, 0.224, 0.225)) -> tuple:
+    
+    cv_img, gt_xywh, gt_clas, im_hw = get_img_data_from_onerecord_dict(record)
+    cv_img, gt_xywh, gt_clas = image_augment(cv_img, gt_xywh, gt_clas, size)
+    
+    mean = np.array(mean, dtype="float32").reshape((1, 1, -1))
+    std = np.array(std, dtype="float32").reshape((1, 1, -1))
+    cv_img = (cv_img / 255. - mean) / std
+    chw_img = cv_img.astype("float32").transpose((2, 0, 1))  
+
+    return  (chw_img, gt_xywh, gt_clas, im_hw)
+
+
 
 if __name__ == "__main__":
     from annotation import voc_parse_generator, get_cname2cid_dict_from_txt
@@ -81,7 +99,7 @@ if __name__ == "__main__":
 
     for i, record in enumerate(record_genator):
 
-        im, gt_xywh, gt_clas, scale = parse_from_record_dict(
+        im, gt_xywh, gt_clas, scale = get_img_data_from_onerecord_dict(
             record, -1, bool(i % 2))
 
         print("\nINFO:\n\timage size is {} \n\tgt_xywh is {} \n\tgt_clas is {} \n\tscale is {}.\n".
