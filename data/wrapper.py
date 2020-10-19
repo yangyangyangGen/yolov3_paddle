@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 
+__all__ = ["get_img_data_from_record_dict"]
 
 def get_bbox_N(gt_bbox, gt_clas, N):
     assert N != 0
@@ -22,8 +23,8 @@ def get_bbox_N(gt_bbox, gt_clas, N):
     return ret_bbox, ret_clas
 
 
-def parse_from_record_dict(record_dict,
-                           number_gt=50, bbox_do_normalize=True):
+def get_img_data_from_record_dict(record_dict,
+                                  number_gt=50, bbox_do_normalize=True) -> tuple:
     """
         record_desc = {
             "im_file": ,

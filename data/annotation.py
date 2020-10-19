@@ -2,9 +2,10 @@ import os
 import numpy as np
 from xml.etree import ElementTree as ET
 
+__all__ = ["get_cname2cid_dict_from_txt", "voc_parse"]
 
 def get_cname2cid_dict_from_txt(
-        label_list_txt=r"D:\workspace\DataSets\det\Insect\ImageSets\label_list.txt"):
+        label_list_txt=r"D:\workspace\DataSets\det\Insect\ImageSets\label_list.txt") -> dict:
 
     assert os.path.exists(
         label_list_txt), "{} not exists".format(label_list_txt)
@@ -16,11 +17,11 @@ def get_cname2cid_dict_from_txt(
     return {cname: idx for idx, cname in enumerate(content)}
 
 
-# todo: upgrade voc_parse voc_parse_generator function.
+# todo: merge voc_parse voc_parse_generator function.
 
 
-def voc_parse(cname2cid_map,
-              image_anno_txt_abspath, split_character=" "):
+def voc_parse(cname2cid_map: dict,
+              image_anno_txt_abspath: str, split_character=" ") -> list:
 
     assert isinstance(
         cname2cid_map, dict), "cname2cid map is not isinstance dict."

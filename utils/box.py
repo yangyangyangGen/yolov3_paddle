@@ -43,16 +43,17 @@ def crop_bbox_x1y1wh(boxes_xywh: np.ndarray, labels: np.ndarray, crop_x1y1wh, im
     """For Data aug.
     删除(置0)不在crop区域的box.
     """
+
     xmin, ymin, w, h = map(float, crop_x1y1wh)
     im_h, im_w = map(float, im_hw)
 
     boxes = boxes_xywh.copy()
     # xywh -> xyxy
-    boxes[:, 0], boxes[:, 2] = boxes[:, 0] - boxes[:, 2] / 2. * im_w, \
-        boxes[:, 0] + boxes[:, 2] / 2 * im_w
+    boxes[:, 0], boxes[:, 2] = (boxes[:, 0] - boxes[:, 2] / 2.) * im_w, \
+        (boxes[:, 0] + boxes[:, 2] / 2) * im_w
 
-    boxes[:, 1], boxes[:, 3] = boxes[:, 1] - boxes[:, 3] / 2. * im_h, \
-        boxes[:, 1] + boxes[:, 3] / 2 * im_h
+    boxes[:, 1], boxes[:, 3] = (boxes[:, 1] - boxes[:, 3] / 2.) * im_h, \
+        (boxes[:, 1] + boxes[:, 3] / 2) * im_h
 
     crop_xyxy = np.array([xmin, ymin, xmin + w, ymin + h])
     boxes_center = (boxes[:, :2] + boxes[:, 2:]) / 2.
@@ -69,23 +70,15 @@ def crop_bbox_x1y1wh(boxes_xywh: np.ndarray, labels: np.ndarray, crop_x1y1wh, im
     boxes[:, 2:] -= crop_xyxy[:2]
     # 判断坐标是否正常， 有点鸡肋.
     mask = np.logical_and(mask, (boxes[:, :2] < boxes[:, 2:]).all(axis=1))
+
     # mask: [N,] -> [N, 1]
     boxes = boxes * np.expand_dims(mask.astype("float32"), axis=1)
     labels = labels * mask.astype("float32")
 
     # xyxy -> xywh
-    """
     boxes[:, 0], boxes[:, 2] = (boxes[:, 0] + boxes[:, 2]) / 2. / w, \
                                (boxes[:, 2] - boxes[:, 0]) / w
 
     boxes[:, 1], boxes[:, 3] = (boxes[:, 1] + boxes[:, 3]) / 2. / h, \
                                (boxes[:, 3] - boxes[:, 1]) / h
-    """
-
-    boxes[:, 0], boxes[:, 2] = (
-        boxes[:, 0] + boxes[:, 2]) / 2., (boxes[:, 2] - boxes[:, 0])
-
-    boxes[:, 1], boxes[:, 3] = (
-        boxes[:, 1] + boxes[:, 3]) / 2., (boxes[:, 3] - boxes[:, 1])
-
     return boxes, labels, mask.sum()
