@@ -1,8 +1,7 @@
+from box import iou_bboxes_xywh
+import numpy as np
 import sys
 sys.path.append("../utils")
-import numpy as np
-
-from box import iou_bboxes_xywh
 
 
 if __name__ == "__main__":
@@ -16,4 +15,3 @@ if __name__ == "__main__":
         [[12, 22, 32, 42]])
     iou = iou_bboxes_xywh(bbox1, bbox3)
     print(iou)
-

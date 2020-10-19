@@ -1,12 +1,10 @@
+from aug import random_expand, random_distort, random_crop
+from matplotlib import pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+import cv2
 import sys
 sys.path.append("../data")
-import cv2
-import numpy as np
-
-import matplotlib.patches as patches
-from matplotlib import pyplot as plt
-
-from aug import random_expand, random_distort, random_crop
 
 
 def draw_rectangle(currentAxis, bbox,
@@ -43,7 +41,6 @@ def test_random_distort():
 
 
 def test_random_expand():
-
     """
     测试参数以及结果.
         do_norm     is_norm        result    function
@@ -80,8 +77,10 @@ def test_random_expand():
 
         h, w = im.shape[:2]
         bboxes_xywh_normed = bboxes_xywh.astype("float32")
-        bboxes_xywh_normed[..., 0::2] = bboxes_xywh_normed[..., 0::2] / float(w)
-        bboxes_xywh_normed[..., 1::2] = bboxes_xywh_normed[..., 1::2] / float(h)
+        bboxes_xywh_normed[...,
+                           0::2] = bboxes_xywh_normed[..., 0::2] / float(w)
+        bboxes_xywh_normed[...,
+                           1::2] = bboxes_xywh_normed[..., 1::2] / float(h)
 
         currentAxis = plt.gca()
         ret_im, ret_bboxes = random_expand(im, bboxes_xywh_normed, thresh=1,
@@ -122,8 +121,10 @@ def test_random_expand():
 
         h, w = im.shape[:2]
         bboxes_xywh_normed = bboxes_xywh.astype("float32")
-        bboxes_xywh_normed[..., 0::2] = bboxes_xywh_normed[..., 0::2] / float(w)
-        bboxes_xywh_normed[..., 1::2] = bboxes_xywh_normed[..., 1::2] / float(h)
+        bboxes_xywh_normed[...,
+                           0::2] = bboxes_xywh_normed[..., 0::2] / float(w)
+        bboxes_xywh_normed[...,
+                           1::2] = bboxes_xywh_normed[..., 1::2] / float(h)
 
         currentAxis = plt.gca()
         ret_im, ret_bboxes = random_expand(im, bboxes_xywh_normed, thresh=1,
@@ -147,8 +148,10 @@ def test_random_expand():
 
         h, w = im.shape[:2]
         bboxes_xywh_normed = bboxes_xywh.astype("float32")
-        bboxes_xywh_normed[..., 0::2] = bboxes_xywh_normed[..., 0::2] / float(w)
-        bboxes_xywh_normed[..., 1::2] = bboxes_xywh_normed[..., 1::2] / float(h)
+        bboxes_xywh_normed[...,
+                           0::2] = bboxes_xywh_normed[..., 0::2] / float(w)
+        bboxes_xywh_normed[...,
+                           1::2] = bboxes_xywh_normed[..., 1::2] / float(h)
 
         currentAxis = plt.gca()
         ret_im, ret_bboxes = random_expand(im, bboxes_xywh_normed, thresh=1,
@@ -205,7 +208,8 @@ def test_random_crop():
     for xywh in bboxes_xywh:
         draw_rectangle(currentAxis, xywh, edgecolor='b')
 
-    out_img, out_xywh, out_clas = random_crop(im, bboxes_xywh_normed, fake_clas)
+    out_img, out_xywh, out_clas = random_crop(
+        im, bboxes_xywh_normed, fake_clas)
 
     plt.subplot(122)
     print(out_xywh)

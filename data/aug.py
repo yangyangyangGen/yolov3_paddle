@@ -2,18 +2,14 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import division
 
+from math import sqrt
+from PIL import Image, ImageEnhance
+import random
+import cv2
+import numpy as np
+from box import iou_bboxes_xywh, crop_bbox_x1y1wh
 import sys
 sys.path.append("../utils")
-from box import iou_bboxes_xywh, crop_bbox_x1y1wh
-
-
-
-import numpy as np
-import cv2
-import random
-
-from PIL import Image, ImageEnhance
-from math import sqrt
 
 
 __all__ = ["random_distort", "random_expand"]
@@ -51,7 +47,7 @@ def random_expand(cv_img,
                   xywh_is_normalize=True,
                   xywh_do_normalize=True):
     """
-    随机填充. 创建一个大的画布进行填充.
+    随机填充. 对原图的外围进行填充 fill, 如果fill为None则填充0.
     Create a Large Background and do fill.
 
     :param max_ratio: 最大比例(相对于原图)
@@ -93,7 +89,8 @@ def random_expand(cv_img,
 
     out_img[offset_y: offset_y+h, offset_x: offset_x+w, :] = cv_img
 
-    norm_fscale = lambda x, y=1.: float(x) if xywh_do_normalize else float(y)
+    def norm_fscale(x, y=1.): return float(
+        x) if xywh_do_normalize else float(y)
 
     if xywh_is_normalize:
         gt_xywh[:, 0] = (gt_xywh[:, 0] * w + offset_x) / norm_fscale(ow)
@@ -123,7 +120,8 @@ def random_crop(cv_img, gt_xywh, gt_clas,
         return cv_img, gt_xywh, gt_clas
 
     if constraints is None:
-        constraints = [(0.1, 1.0), (0.3, 1.0), (0.5, 1.0), (0.7, 1.0), (0.9, 1.0), (0.0, 1.0)]
+        constraints = [(0.1, 1.0), (0.3, 1.0), (0.5, 1.0),
+                       (0.7, 1.0), (0.9, 1.0), (0.0, 1.0)]
 
     pil_img = Image.fromarray(cv_img)
     w, h = pil_img.size
@@ -154,7 +152,8 @@ def random_crop(cv_img, gt_xywh, gt_clas,
     print("crop_boxes", crop_boxes)
     while crop_boxes:
         crop_box = crop_boxes.pop(random.randint(0, len(crop_boxes) - 1))
-        out_crop_boxes, out_crop_labels, life_box_num = crop_bbox_x1y1wh(gt_xywh, gt_clas, crop_box, (h, w))
+        out_crop_boxes, out_crop_labels, life_box_num = crop_bbox_x1y1wh(
+            gt_xywh, gt_clas, crop_box, (h, w))
         if life_box_num < 1:
             continue
 
@@ -169,5 +168,3 @@ def random_crop(cv_img, gt_xywh, gt_clas,
 
 if __name__ == "__main__":
     pass
-
-

@@ -12,7 +12,3 @@ if __name__ == "__main__":
     out.show()
 
     # im.crop()
-
-
-
-

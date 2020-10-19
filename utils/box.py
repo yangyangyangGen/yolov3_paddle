@@ -8,14 +8,20 @@ def iou_bboxes_xywh(bbox1: np.ndarray, bbox2: np.ndarray):
     """
     assert bbox1.shape[-1] == 4 and bbox2.shape[-1] == 4
 
-    bbox1_xmin, bbox1_xmax = bbox1[:, 0] - bbox1[:, 2] / 2., bbox1[:, 0] + bbox1[:, 2] / 2.
-    bbox1_ymin, bbox1_ymax = bbox1[:, 1] - bbox1[:, 3] / 2., bbox1[:, 1] + bbox1[:, 3] / 2.
+    bbox1_xmin, bbox1_xmax = bbox1[:, 0] - \
+        bbox1[:, 2] / 2., bbox1[:, 0] + bbox1[:, 2] / 2.
+    bbox1_ymin, bbox1_ymax = bbox1[:, 1] - \
+        bbox1[:, 3] / 2., bbox1[:, 1] + bbox1[:, 3] / 2.
 
-    bbox2_xmin, bbox2_xmax = bbox2[:, 0] - bbox2[:, 2] / 2., bbox2[:, 0] + bbox2[:, 2] / 2.
-    bbox2_ymin, bbox2_ymax = bbox2[:, 1] - bbox2[:, 3] / 2., bbox2[:, 1] + bbox2[:, 3] / 2.
+    bbox2_xmin, bbox2_xmax = bbox2[:, 0] - \
+        bbox2[:, 2] / 2., bbox2[:, 0] + bbox2[:, 2] / 2.
+    bbox2_ymin, bbox2_ymax = bbox2[:, 1] - \
+        bbox2[:, 3] / 2., bbox2[:, 1] + bbox2[:, 3] / 2.
 
-    bbox1_area = (bbox1_xmax - bbox1_xmin + 1.) * (bbox1_ymax - bbox1_ymin + 1.)
-    bbox2_area = (bbox2_xmax - bbox2_xmin + 1.) * (bbox2_ymax - bbox2_ymin + 1.)
+    bbox1_area = (bbox1_xmax - bbox1_xmin + 1.) * \
+        (bbox1_ymax - bbox1_ymin + 1.)
+    bbox2_area = (bbox2_xmax - bbox2_xmin + 1.) * \
+        (bbox2_ymax - bbox2_ymin + 1.)
 
     inter_xmin = np.maximum(bbox1_xmin, bbox2_xmin)
     inter_ymin = np.maximum(bbox1_ymin, bbox2_ymin)
@@ -43,16 +49,17 @@ def crop_bbox_x1y1wh(boxes_xywh: np.ndarray, labels: np.ndarray, crop_x1y1wh, im
     boxes = boxes_xywh.copy()
     # xywh -> xyxy
     boxes[:, 0], boxes[:, 2] = boxes[:, 0] - boxes[:, 2] / 2. * im_w, \
-                               boxes[:, 0] + boxes[:, 2] / 2 * im_w
+        boxes[:, 0] + boxes[:, 2] / 2 * im_w
 
     boxes[:, 1], boxes[:, 3] = boxes[:, 1] - boxes[:, 3] / 2. * im_h, \
-                               boxes[:, 1] + boxes[:, 3] / 2 * im_h
+        boxes[:, 1] + boxes[:, 3] / 2 * im_h
 
     crop_xyxy = np.array([xmin, ymin, xmin + w, ymin + h])
     boxes_center = (boxes[:, :2] + boxes[:, 2:]) / 2.
 
     # get [N, ] 代表crop的框是否包含了此物体
-    mask = np.logical_and(crop_xyxy[:2] <= boxes_center, boxes_center <= crop_xyxy[2:]).all(axis=1)
+    mask = np.logical_and(
+        crop_xyxy[:2] <= boxes_center, boxes_center <= crop_xyxy[2:]).all(axis=1)
 
     # align
     boxes[:, :2] = np.maximum(boxes[:, :2], crop_xyxy[:2])
@@ -75,25 +82,10 @@ def crop_bbox_x1y1wh(boxes_xywh: np.ndarray, labels: np.ndarray, crop_x1y1wh, im
                                (boxes[:, 3] - boxes[:, 1]) / h
     """
 
-    boxes[:, 0], boxes[:, 2] = (boxes[:, 0] + boxes[:, 2]) / 2., (boxes[:, 2] - boxes[:, 0])
+    boxes[:, 0], boxes[:, 2] = (
+        boxes[:, 0] + boxes[:, 2]) / 2., (boxes[:, 2] - boxes[:, 0])
 
-    boxes[:, 1], boxes[:, 3] = (boxes[:, 1] + boxes[:, 3]) / 2., (boxes[:, 3] - boxes[:, 1])
+    boxes[:, 1], boxes[:, 3] = (
+        boxes[:, 1] + boxes[:, 3]) / 2., (boxes[:, 3] - boxes[:, 1])
 
     return boxes, labels, mask.sum()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

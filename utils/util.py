@@ -86,7 +86,7 @@ if __name__ == "__main__":
     for bbox in bboxes:
         draw_rectangle(currentAxis, bbox, edgecolor='b')
     plt.show()
-    
+
     """
 
     """
@@ -101,9 +101,4 @@ if __name__ == "__main__":
     print('box_iou_xywh IoU is {}'.format(iou))
     """
 
-
     #
-
-
-
-
