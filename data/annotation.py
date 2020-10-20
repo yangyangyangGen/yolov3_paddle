@@ -4,8 +4,9 @@ from xml.etree import ElementTree as ET
 
 __all__ = ["get_cname2cid_dict_from_txt", "voc_parse"]
 
+
 def get_cname2cid_dict_from_txt(
-        label_list_txt=r"D:\workspace\DataSets\det\Insect\ImageSets\label_list.txt") -> dict:
+        label_list_txt) -> dict:
 
     assert os.path.exists(
         label_list_txt), "{} not exists".format(label_list_txt)

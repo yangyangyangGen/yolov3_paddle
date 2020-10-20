@@ -174,8 +174,6 @@ def random_crop(cv_img, gt_xywh, gt_clas,
                                 crop_box[0] + crop_box[2], crop_box[1] + crop_box[3])).resize(pil_img.size, Image.LANCZOS)
         out_img = np.asarray(pil_img)
 
-        print("will return.")
-
         return out_img, out_crop_boxes, out_crop_labels
 
     return cv_img, gt_xywh, gt_clas
