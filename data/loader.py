@@ -18,7 +18,6 @@ def get_data_loader(label_list_txt: str, image_label_path_mapper_txt: str,
         f"{image_label_path_mapper_txt} not exists."
 
     cname2cid_map = get_cname2cid_dict_from_txt(label_list_txt)
-
     records = voc_parse(cname2cid_map, image_label_path_mapper_txt)
 
     def reader():
