@@ -3,16 +3,8 @@ import cv2
 import numpy as np
 import random
 
-# from .aug import image_augment
-# from .annotation import voc_parse, get_cname2cid_dict_from_txt
-
-from functools import wraps
-import time
-
-from aug import image_augment
-from annotation import voc_parse, get_cname2cid_dict_from_txt
-
-__all__ = ["get_data_loader"]
+from .aug import image_augment
+# from aug import image_augment
 
 
 def get_bbox_N(gt_bbox, gt_clas, N):
@@ -34,8 +26,8 @@ def get_bbox_N(gt_bbox, gt_clas, N):
     return ret_bbox, ret_clas
 
 
-def get_img_data_from_onerecord_dict(record_dict,
-                                     number_gt=50, bbox_do_normalize=True) -> tuple:
+def parse_record_dict(record_dict,
+                      number_gt=50, bbox_do_normalize=True) -> tuple:
     """
         record_desc = {
             "im_file": ,
@@ -88,12 +80,12 @@ def get_img_data_from_record(record, size,
                              mean=(0.485, 0.456, 0.406),
                              std=(0.229, 0.224, 0.225)) -> tuple:
 
-    cv_img, gt_xywh, gt_clas, im_hw = get_img_data_from_onerecord_dict(record)
+    cv_img, gt_xywh, gt_clas, im_hw = parse_record_dict(record)
     cv_img, gt_xywh, gt_clas = image_augment(cv_img, gt_xywh, gt_clas, size)
 
     mean = np.array(mean, dtype="float32").reshape((1, 1, -1))
     std = np.array(std, dtype="float32").reshape((1, 1, -1))
-    # Standard.
+    #
     cv_img = (cv_img / 255. - mean) / std
     chw_img = cv_img.astype("float32").transpose((2, 0, 1))
 
@@ -102,13 +94,13 @@ def get_img_data_from_record(record, size,
 
 def get_image_size(is_train: int, max_stride=32) -> int:
     """
-    @param: is_train: 
-                > 0 train mode, 
-                = 0 valid mode, 
+    @param: is_train:
+                > 0 train mode,
+                = 0 valid mode,
                 < 0 test_mode.
 
-    Train or Valid: Multi scale: random choice[320 + i * `max_stride` for i in range(10)] ~= [320, 608]
-    Test: Single scale.
+    Train or Valid: Multi scale: random ~[320, 608, 32]
+    Test: 608
     """
     size = 0
     if is_train >= 0:
@@ -118,103 +110,25 @@ def get_image_size(is_train: int, max_stride=32) -> int:
     return size
 
 
-def make_ndarray(batch_data):
-    im_nd = np.array([item[0] for item in batch_data], dtype="float32")
-    xywh_nd = np.array([item[1] for item in batch_data], dtype="float32")
-    clas_nd = np.array([item[2] for item in batch_data], dtype="int32")
-    hw_nd = np.array([item[3] for item in batch_data], dtype="int32")
-    return im_nd, xywh_nd, clas_nd, hw_nd
-
-
-def get_data_loader(label_list_txt: str, image_label_path_mapper_txt: str,
-                    batch_size: int, is_train: int, drop_last=False):
-    """
-    singleProcess.
-    @param: is_train: 
-                > 0 train mode, 
-                = 0 valid mode, 
-                < 0 test_mode.
-    """
-
-    assert os.path.exists(label_list_txt), \
-        f"{label_list_txt} not exists."
-    assert os.path.exists(image_label_path_mapper_txt), \
-        f"{image_label_path_mapper_txt} not exists."
-
-    cname2cid_map = get_cname2cid_dict_from_txt(label_list_txt)
-
-    records = voc_parse(cname2cid_map, image_label_path_mapper_txt)
-
-    def reader():
-        idx = list(range(len(records)))
-        if is_train > 0:
-            random.shuffle(idx)
-
-        batch = []
-        im_size = get_image_size(is_train)
-        for i in idx:
-            batch.append(get_img_data_from_record(records[i], im_size))
-            if len(batch) == batch_size:
-                yield make_ndarray(batch)
-                batch = []
-                im_size = get_image_size(is_train)
-
-        if not drop_last and len(batch):
-            yield make_ndarray(batch)
-
-    return reader
-
-
-def get_multithread_data_loader(label_list_txt: str, image_label_path_mapper_txt: str,
-                                batch_size: int, is_train: int, num_thread: int, buffer_size: int, drop_last=False):
-    """
-    By Paddle Implemention Multi thread data loader.
-    @param: is_train: 
-                > 0 train mode, 
-                = 0 valid mode, 
-                < 0 test_mode.
-    """
-    import functools
-    import paddle
-
-    assert os.path.exists(label_list_txt), \
-        f"{label_list_txt} not exists."
-    assert os.path.exists(image_label_path_mapper_txt), \
-        f"{image_label_path_mapper_txt} not exists."
-
-    cname2cid_map = get_cname2cid_dict_from_txt(label_list_txt)
-
-    records = voc_parse(cname2cid_map, image_label_path_mapper_txt)[:1000]
-
-    def reader():
-        idx = list(range(len(records)))
-        if is_train > 0:
-            random.shuffle(idx)
-
-        batch = []
-        im_size = get_image_size(is_train)
-        for i in idx:
-            batch.append((records[i], im_size))
-            if len(batch) == batch_size:
-                yield batch
-                batch = []
-                im_size = get_image_size(is_train)
-
-        if not drop_last and len(batch):
-            yield batch
-
-    def get_data_fn(items):
-        return make_ndarray([get_img_data_from_record(*item)
-                             for item in items])
-    '''
-    def get_data_fn(items):
-        batch = []
-        for item in items:
-            batch.append(get_img_data_from_record(item[0], item[1]))
-        return make_ndarray(batch)
-    '''
-    # mapper = functools.partial(get_data_fn, )
-    return paddle.reader.xmap_readers(get_data_fn, reader, num_thread, buffer_size)
+def make_ndarray(batch_data, is_train=1):
+    if is_train >= 0:
+        im_nd = np.array([item[0]
+                          for item in batch_data], dtype="float32")
+        xywh_nd = np.array([item[1]
+                            for item in batch_data], dtype="float32")
+        clas_nd = np.array([item[2]
+                            for item in batch_data], dtype="int32")
+        hw_nd = np.array([item[3]
+                          for item in batch_data], dtype="int32")
+        return im_nd, xywh_nd, clas_nd, hw_nd
+    else:
+        img_name_array = np.array([item[0]
+                                   for item in batch_data])
+        img_data_array = np.array([item[1]
+                                   for item in batch_data], dtype='float32')
+        img_scale_array = np.array([item[2]
+                                    for item in batch_data], dtype='int32')
+        return img_name_array, img_data_array, img_scale_array
 
 
 if __name__ == "__main__":
@@ -228,6 +142,10 @@ if __name__ == "__main__":
             f"{batch_im.shape} {batch_bbox.shape} {batch_clas.shape} {batch_hw.shape}")
     '''
 
+    """"
+    from functools import wraps
+    import time
+    # time hook.
     def timing(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -240,7 +158,6 @@ if __name__ == "__main__":
 
     @timing
     def fn():
-
         multithread_data_loader = get_multithread_data_loader(
             r"D:\workspace\DataSets\det\Insect\ImageSets\label_list.txt",
             r"D:\workspace\DataSets\det\Insect\ImageSets\train.txt",
@@ -251,3 +168,4 @@ if __name__ == "__main__":
                 f"{batch_im.shape} {batch_bbox.shape} {batch_clas.shape} {batch_hw.shape}")
 
     fn()
+    """"
